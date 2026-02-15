@@ -1,10 +1,12 @@
-#!/usr/bin/env python3
+
 """
-CS6674 Programming Project 2 - Client (Python)
+Terrill Walker
+February 13, 2026
+CS6674 Programming Project 2 - Client 
 
 RUN:
-1) python3 server.py
-2) python3 client.py 127.0.0.1
+1) python server.py
+2) python client.py 127.0.0.1
 """
 
 import socket
@@ -15,9 +17,9 @@ ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 MOD = 52
 CHAR_TO_NUM = {ch: i for i, ch in enumerate(ALPHABET)}
 
-# ---------- SHIFT CIPHER (same as Project 1) ----------
+# Shift cipher
 def shift_encrypt(text: str, k_star: int) -> str:
-    """Encrypt letters: y = (x + k*) mod 52. Non-letters unchanged."""
+    """Encrypt letters: y = (x + k*) mod 52. """
     out = []
     shift = k_star % MOD
     for ch in text:
@@ -37,7 +39,7 @@ def generate_k_and_kstar(a: int, b: int):
         if k_star != 0:
             return k, k_star
 
-# ---------- DES (tables + helpers) ----------
+# DES -- tables and helpers
 IP = [
 58,50,42,34,26,18,10,2, 60,52,44,36,28,20,12,4,
 62,54,46,38,30,22,14,6, 64,56,48,40,32,24,16,8,
@@ -196,7 +198,7 @@ def des_encrypt_hex_line(hexline: str, key_hex: str) -> str:
         out.append(f"{c:016X}")
     return "".join(out)
 
-# ---------- MAIN ----------
+# Main
 def main():
     if len(sys.argv) < 2:
         print("Usage: python3 client.py <SERVER_IP>")
@@ -213,7 +215,7 @@ def main():
         print("[CLIENT] Connected to server.")
         f = s.makefile("r", encoding="utf-8", newline="\n")
 
-        # Server menu (3 lines)
+        #Server menu 
         print(f.readline().rstrip())
         print(f.readline().rstrip())
         print(f.readline().rstrip())
@@ -224,14 +226,14 @@ def main():
         s.sendall((choice + "\n").encode("utf-8"))
 
         if choice == "1":
-            # ---- SHIFT MODE (Project 1 flow) ----
+            # shift mode
             k, k_star = generate_k_and_kstar(a, b)
             print(f"[CLIENT] Generated k={k}, computed k*={k_star}")
 
-            # send k in plaintext
+            #send k in plaintext
             s.sendall(f"{k}\n".encode("utf-8"))
 
-            # read server ready ack
+            #read server ready ack
             server_ready = f.readline().strip()
             if server_ready:
                 print("[CLIENT] Server:", server_ready)
@@ -251,7 +253,7 @@ def main():
                 print("[CLIENT] Server:", ack)
 
         else:
-            # ---- DES MODE ----
+            # DES MODE
             filename = input("Enter DES input filename (ex: input.txt): ").strip()
             if not filename:
                 filename = "input.txt"
@@ -266,14 +268,14 @@ def main():
 
                         ct = des_encrypt_hex_line(line, KEY_HEX)
 
-                        # show plaintext and ciphertext (hex)
+                        #show plaintext and ciphertext 
                         print(f"(plaintext, ciphertext) = ({line}, {ct})")
 
                         s.sendall((ct + "\n").encode("utf-8"))
                         ack = f.readline().strip()
                         print("[CLIENT] Server:", ack)
 
-                # tell server we're done
+                # quit
                 s.sendall(b"quit\n")
                 ack = f.readline().strip()
                 print("[CLIENT] Server:", ack)

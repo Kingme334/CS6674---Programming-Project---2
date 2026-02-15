@@ -1,10 +1,18 @@
+"""
+Terrill Walker
+February 13, 2026
+CS 6674 - Programming Project 2 - Server
+
+"""
+
+
 import socket
 
 ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 MOD = 52
 a, b = 250, 479
 
-# Build fast lookup once (more thorough)
+# look up
 CHAR_TO_NUM = {ch: i for i, ch in enumerate(ALPHABET)}
 
 def decrypt_shift(text: str, k_star: int) -> str:
@@ -18,7 +26,7 @@ def decrypt_shift(text: str, k_star: int) -> str:
             out.append(ch)
     return "".join(out)
 
-# ---------- DES (decrypt side) ----------
+# DES -- decrypt
 IP = [
 58,50,42,34,26,18,10,2, 60,52,44,36,28,20,12,4,
 62,54,46,38,30,22,14,6, 64,56,48,40,32,24,16,8,
@@ -164,7 +172,7 @@ def _clean_hex_line(line: str) -> str:
     return "".join(line.strip().split()).upper()
 
 def main():
-    HOST = "0.0.0.0"   # works locally and over network
+    HOST = "0.0.0.0"   
     PORT = 5000
     KEY_HEX = "C30950FA36CF58CF"
     key64 = int(KEY_HEX, 16)
@@ -180,7 +188,7 @@ def main():
             print(f"[SERVER] Connected by {addr}")
             f = conn.makefile("r", encoding="utf-8", newline="\n")
 
-            # ---- Send Menu (Project 2 requirement) ----
+            # Send menu
             conn.sendall(b"1) Shift Cipher\n")
             conn.sendall(b"2) DES\n")
             conn.sendall(b"Select encryption (send 1 or 2):\n")
@@ -194,7 +202,7 @@ def main():
             print(f"[SERVER] Client selected option: {choice}")
 
             if choice == "1":
-                # ---- SHIFT MODE (Project 1 behavior) ----
+                # Shift mode 
                 k_line = f.readline()
                 if not k_line:
                     print("[SERVER] No k received. Closing.")
@@ -223,7 +231,7 @@ def main():
                     conn.sendall(b"ACK: message received\n")
 
             else:
-                # ---- DES MODE ----
+                # DES MODE
                 print(f"[SERVER] DES mode using key {KEY_HEX}")
 
                 while True:
@@ -241,7 +249,7 @@ def main():
                     if not ct_line:
                         continue
 
-                    # Must be multiples of 64-bit blocks -> 16 hex chars each
+                    # Must be multiples of 64-bit blocks 
                     if len(ct_line) % 16 != 0:
                         print(f"[SERVER] WARNING: ciphertext line not multiple of 16 hex chars: {ct_line}")
                         conn.sendall(b"ACK: message received\n")
@@ -255,7 +263,7 @@ def main():
                         pt_parts.append(f"{p:016X}")
                     pt_line = "".join(pt_parts)
 
-                    # Keep your same print format, but hex blocks
+                    # print hex blocks
                     print(f"(ciphertext, plaintext) = ({ct_line}, {pt_line})")
                     conn.sendall(b"ACK: message received\n")
 
